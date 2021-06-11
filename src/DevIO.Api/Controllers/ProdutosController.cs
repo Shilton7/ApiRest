@@ -2,6 +2,7 @@
 using DevIO.Api.ViewsModels;
 using DevIO.Business.Intefaces;
 using DevIO.Business.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -78,6 +79,22 @@ namespace DevIO.Api.Controllers
             return CustomResponse(produtoViewModel);
         }
 
+        [RequestSizeLimit(40000000)]
+        [HttpPost("adicionar-file-large")]
+        public async Task<ActionResult<ProdutoViewModel>> AdicionarFileLarge(ProdutoImagemViewModel produtoImagemViewModel)
+        {
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            var imgPrefixo = Guid.NewGuid() + "_";
+
+            if (!await UploadArquivoLarge(produtoImagemViewModel.ImagemUpload, imgPrefixo)) return CustomResponse();
+
+            produtoImagemViewModel.Imagem = imgPrefixo + produtoImagemViewModel.ImagemUpload.FileName;
+            await _produtoService.Adicionar(_mapper.Map<Produto>(produtoImagemViewModel));
+
+            return CustomResponse(produtoImagemViewModel);
+        }
+
         private bool UploadArquivo(string arquivo,string imgNome)
         {
             if(string.IsNullOrEmpty(arquivo))
@@ -99,6 +116,31 @@ namespace DevIO.Api.Controllers
 
             //gerar o arquivo final
             System.IO.File.WriteAllBytes(filePath, imageDataByteArray);
+
+            return true;
+
+        }
+
+        private async Task<bool> UploadArquivoLarge(IFormFile arquivo, string imgPrefixo)
+        {
+            if (arquivo == null || arquivo.Length == 0)
+            {
+                NotificarErro("Forneça uma imagem para este produto!");
+                return false;
+            }
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens", imgPrefixo + arquivo.FileName);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                NotificarErro("Já existe um arquivo com este nome!");
+                return false;
+            }
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await arquivo.CopyToAsync(stream);
+            }
 
             return true;
 
