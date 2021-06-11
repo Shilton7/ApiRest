@@ -79,6 +79,42 @@ namespace DevIO.Api.Controllers
             return CustomResponse(produtoViewModel);
         }
 
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Atualizar(Guid id, ProdutoViewModel produtoViewModel)
+        {
+            if (id != produtoViewModel.Id)
+            {
+                NotificarErro("Os ids informados não são iguais!");
+                return CustomResponse();
+            }
+
+            var produtoAtualizacao = await ObterProduto(id);
+            if (produtoAtualizacao == null) return NotFound();
+
+            produtoViewModel.Imagem = produtoAtualizacao.Imagem;
+
+            if (!ModelState.IsValid) return CustomResponse(ModelState);
+
+            if (produtoViewModel.ImagemUpload != null)
+            {
+                var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
+
+                if (!UploadArquivo(produtoViewModel.ImagemUpload, imagemNome)) return CustomResponse(ModelState);
+
+                produtoAtualizacao.Imagem = imagemNome;
+            }
+
+            produtoAtualizacao.Nome = produtoViewModel.Nome;
+            produtoAtualizacao.Descricao = produtoViewModel.Descricao;
+            produtoAtualizacao.Valor = produtoViewModel.Valor;
+            produtoAtualizacao.Ativo = produtoViewModel.Ativo;
+
+            await _produtoService.Atualizar(_mapper.Map<Produto>(produtoAtualizacao));
+
+            return CustomResponse(produtoViewModel);
+
+        }
+
         [RequestSizeLimit(40000000)]
         [HttpPost("adicionar-file-large")]
         public async Task<ActionResult<ProdutoViewModel>> AdicionarFileLarge(ProdutoImagemViewModel produtoImagemViewModel)
@@ -145,8 +181,6 @@ namespace DevIO.Api.Controllers
             return true;
 
         }
-
-
 
     }
 }
