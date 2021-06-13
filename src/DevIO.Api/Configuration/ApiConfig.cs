@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,23 @@ namespace DevIO.Api.Configuration
                 options.SuppressModelStateInvalidFilter = true;
             });
 
-            //AddCors
+            // AddCors
+            services.AddCors(options =>
+            {
+                options.AddPolicy("Development", builder =>
+                    builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials());
+
+                options.AddPolicy("Production", builder =>
+                    builder
+                    .WithMethods("GET")
+                    .WithOrigins("http://shilton.dev.io")
+                    .SetIsOriginAllowedToAllowWildcardSubdomains()
+                    .AllowAnyHeader());
+            });
 
             return services;
         }
