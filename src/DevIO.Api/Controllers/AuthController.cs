@@ -1,10 +1,15 @@
-﻿using DevIO.Api.ViewsModels;
+﻿using DevIO.Api.Extensions;
+using DevIO.Api.ViewsModels;
 using DevIO.Business.Intefaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace DevIO.Api.Controllers
@@ -14,13 +19,16 @@ namespace DevIO.Api.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly AppSettings _appSettings;
 
-        public AuthController(INotificador notificador, 
-                              SignInManager<IdentityUser> signInManager, 
-                              UserManager<IdentityUser> userManager) : base(notificador)
+        public AuthController(INotificador notificador,
+                              SignInManager<IdentityUser> signInManager,
+                              UserManager<IdentityUser> userManager,
+                              IOptions<AppSettings> appSettings) : base(notificador)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _appSettings = appSettings.Value;
         }
 
         [HttpPost("nova-conta")]
@@ -42,7 +50,7 @@ namespace DevIO.Api.Controllers
             if(result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
-                return CustomResponse(registerUser);
+                return CustomResponse(GerarJWT());
             }
 
             foreach(var error in result.Errors)
@@ -60,7 +68,7 @@ namespace DevIO.Api.Controllers
 
             var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
 
-            if (result.Succeeded) return CustomResponse(loginUser);
+            if (result.Succeeded) return CustomResponse(GerarJWT());
 
             if(result.IsLockedOut)
             {
@@ -70,6 +78,23 @@ namespace DevIO.Api.Controllers
 
             NotificarErro("Usuário ou Senha incorretos");
             return CustomResponse(loginUser);
+        }
+
+        private string GerarJWT()
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = _appSettings.Emissor,
+                Audience = _appSettings.ValidoEm,
+                Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), 
+                                                            SecurityAlgorithms.HmacSha256Signature)
+            });
+
+            var encodedToken = tokenHandler.WriteToken(token);
+            return encodedToken;
         }
 
 
