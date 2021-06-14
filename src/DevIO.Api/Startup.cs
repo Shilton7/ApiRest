@@ -35,16 +35,13 @@ namespace DevIO.Api
 
             services.WebApiConfig();
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "My APi", Version = "V1" });
-            });
+            services.AddSwaggerConfig();
 
             services.ResolveDependencies();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApiVersionDescriptionProvider provider)
         {
             if (env.IsDevelopment())
             {
@@ -60,11 +57,8 @@ namespace DevIO.Api
             app.UseAuthentication();
             app.UseMvcConfiguration();
 
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            });
+            app.UseSwaggerConfig(provider);
+            
         }
     }
 }
