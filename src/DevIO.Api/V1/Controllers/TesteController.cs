@@ -11,6 +11,8 @@ namespace DevIO.Api.V1.Controllers
         public TesteController(INotificador notificador, IUser user) : base(notificador, user)
         {
         }
+
+        [HttpGet]
         public string Valor()
         {
             return "Sou a api version V1";

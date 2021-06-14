@@ -53,7 +53,7 @@ namespace DevIO.Api.V1.Controllers
 
         }
 
-        public async Task<ProdutoViewModel> ObterProduto(Guid id)
+        protected async Task<ProdutoViewModel> ObterProduto(Guid id)
         {
             return _mapper.Map<ProdutoViewModel>(await _produtoRepository.ObterProdutoFornecedor(id));
         }
