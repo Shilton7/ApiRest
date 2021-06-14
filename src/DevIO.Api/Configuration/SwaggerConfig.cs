@@ -40,6 +40,7 @@ namespace DevIO.Api.Configuration
 
         public static IApplicationBuilder UseSwaggerConfig(this IApplicationBuilder app, IApiVersionDescriptionProvider provider)
         {
+            // Restringindo o acesso ao Swagger
             //app.UseMiddleware<SwaggerAuthorizedMiddleware>();
             app.UseSwagger();
             app.UseSwaggerUI(
@@ -121,6 +122,7 @@ namespace DevIO.Api.Configuration
         }
     }
 
+    // Restringindo o acesso ao Swagger
     public class SwaggerAuthorizedMiddleware
     {
         private readonly RequestDelegate _next;
