@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DevIO.Api.Controllers;
 using DevIO.Api.ViewsModels;
 using DevIO.Business.Intefaces;
 using DevIO.Business.Models;
@@ -11,18 +12,19 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DevIO.Api.Controllers
+namespace DevIO.Api.V1.Controllers
 {
     [Authorize]
-    [Route("api/produtos")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/produtos")]
     public class ProdutosController : MainController
     {
         private readonly IProdutoRepository _produtoRepository;
         private readonly IProdutoService _produtoService;
         private readonly IMapper _mapper;
 
-        public ProdutosController(INotificador notificador, 
-                                  IProdutoRepository produtoRepository, 
+        public ProdutosController(INotificador notificador,
+                                  IProdutoRepository produtoRepository,
                                   IProdutoService produtoService,
                                   IMapper mapper,
                                   IUser user) : base(notificador, user)
@@ -76,7 +78,7 @@ namespace DevIO.Api.Controllers
             var imagemNome = Guid.NewGuid() + "_" + produtoViewModel.Imagem;
 
             if (!UploadArquivo(produtoViewModel.ImagemUpload, imagemNome)) return CustomResponse();
-            
+
             produtoViewModel.Imagem = imagemNome;
             await _produtoService.Adicionar(_mapper.Map<Produto>(produtoViewModel));
 
@@ -135,9 +137,9 @@ namespace DevIO.Api.Controllers
             return CustomResponse(produtoImagemViewModel);
         }
 
-        private bool UploadArquivo(string arquivo,string imgNome)
+        private bool UploadArquivo(string arquivo, string imgNome)
         {
-            if(string.IsNullOrEmpty(arquivo))
+            if (string.IsNullOrEmpty(arquivo))
             {
                 //ModelState.AddModelError(string.Empty, "Forneça uma imagem para este produto!");
                 NotificarErro("Forneça uma imagem para este produto!");
@@ -147,7 +149,7 @@ namespace DevIO.Api.Controllers
             var imageDataByteArray = Convert.FromBase64String(arquivo);
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens", imgNome);
 
-            if(System.IO.File.Exists(filePath))
+            if (System.IO.File.Exists(filePath))
             {
                 //ModelState.AddModelError(string.Empty, "Já existe um arquivo com este nome!");
                 NotificarErro("Já existe um arquivo com este nome!");

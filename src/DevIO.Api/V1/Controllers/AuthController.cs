@@ -1,4 +1,5 @@
-﻿using DevIO.Api.Extensions;
+﻿using DevIO.Api.Controllers;
+using DevIO.Api.Extensions;
 using DevIO.Api.ViewsModels;
 using DevIO.Business.Intefaces;
 using Microsoft.AspNetCore.Identity;
@@ -13,9 +14,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DevIO.Api.Controllers
+namespace DevIO.Api.V1.Controllers
 {
-    [Route("api")]
+
+    //[ApiVersion("1.0", Deprecated = true)]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}")]
     public class AuthController : MainController
     {
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -46,16 +50,16 @@ namespace DevIO.Api.Controllers
                 EmailConfirmed = true
             };
 
-            var result = await _userManager.CreateAsync(user,registerUser.Password);
+            var result = await _userManager.CreateAsync(user, registerUser.Password);
 
             //logando o usuário
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
                 return CustomResponse(await GerarJWT(user.Email));
             }
 
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 NotificarErro(error.Description);
             }
@@ -72,7 +76,7 @@ namespace DevIO.Api.Controllers
 
             if (result.Succeeded) return CustomResponse(await GerarJWT(loginUser.Email));
 
-            if(result.IsLockedOut)
+            if (result.IsLockedOut)
             {
                 NotificarErro("Usuário temporariamente bloqueado por tentativas inválidas");
                 return CustomResponse(loginUser);
@@ -130,11 +134,11 @@ namespace DevIO.Api.Controllers
                 }
             };
             return response;
-    }
+        }
 
         private static long ToUnixEpochDate(DateTime date)
             => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
 
-        }
+    }
 
 }
