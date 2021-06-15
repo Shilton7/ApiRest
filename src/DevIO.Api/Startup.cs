@@ -9,6 +9,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using DevIO.Api.Extensions;
 
 namespace DevIO.Api
 {
@@ -37,6 +38,8 @@ namespace DevIO.Api
 
             services.AddSwaggerConfig();
 
+            services.AddLoggingConfiguration(Configuration);
+
             services.ResolveDependencies();
         }
 
@@ -55,10 +58,13 @@ namespace DevIO.Api
                 app.UseHsts();
             }
             app.UseAuthentication();
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseMvcConfiguration();
 
             app.UseSwaggerConfig(provider);
-            
+            app.UseLoggingConfiguration();
+
+
         }
     }
 }
