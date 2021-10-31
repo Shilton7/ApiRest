@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace DevIO.Api.Configuration
@@ -19,20 +20,30 @@ namespace DevIO.Api.Configuration
             {
                 c.OperationFilter<SwaggerDefaultValues>();
 
-                var security = new Dictionary<string, IEnumerable<string>>
-                {
-                    {"Bearer", new string[] { }}
-                };
-
-                c.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "Insira o token JWT desta maneira: Bearer {seu token}",
                     Name = "Authorization",
-                    In = "header",
-                    Type = "apiKey"
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
                 });
 
-                c.AddSecurityRequirement(security);
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
 
             return services;
@@ -69,16 +80,15 @@ namespace DevIO.Api.Configuration
             }
         }
 
-        static Info CreateInfoForApiVersion(ApiVersionDescription description)
+        static OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
         {
-            var info = new Info()
+            var info = new OpenApiInfo()
             {
                 Title = "API - Shilton",
                 Version = description.ApiVersion.ToString(),
                 Description = "Esta API faz parte do curso REST com ASP.NET Core WebAPI.",
-                Contact = new Contact() { Name = "Shilton", Email = "shilton@gmail.com" },
-                TermsOfService = "https://opensource.org/licenses/MIT",
-                License = new License() { Name = "MIT", Url = "https://opensource.org/licenses/MIT" }
+                Contact = new OpenApiContact() { Name = "Shilton", Email = "shilton@gmail.com" },
+                License = new OpenApiLicense() { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
             };
 
             if (description.IsDeprecated)
@@ -92,7 +102,7 @@ namespace DevIO.Api.Configuration
 
     public class SwaggerDefaultValues : IOperationFilter
     {
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             var apiDescription = context.ApiDescription;
 
@@ -103,7 +113,7 @@ namespace DevIO.Api.Configuration
                 return;
             }
 
-            foreach (var parameter in operation.Parameters.OfType<NonBodyParameter>())
+            foreach (var parameter in operation.Parameters)
             {
                 var description = apiDescription.ParameterDescriptions.First(p => p.Name == parameter.Name);
 
@@ -112,9 +122,9 @@ namespace DevIO.Api.Configuration
                     parameter.Description = description.ModelMetadata?.Description;
                 }
 
-                if (parameter.Default == null)
+                if (parameter.Description == null)
                 {
-                    parameter.Default = description.DefaultValue;
+                    parameter.Description = description.ModelMetadata?.Description;
                 }
 
                 parameter.Required |= description.IsRequired;

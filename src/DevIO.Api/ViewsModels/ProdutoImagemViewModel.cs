@@ -2,14 +2,12 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DevIO.Api.ViewsModels
 {
-    [ModelBinder(typeof(JsonWithFilesFormDataModelBinder), Name = "produto")]
+    // Binder personalizado para envio de IFormFile e ViewModel dentro de um FormData compatível com .NET Core 3.1 ou superior (system.text.json)
+    [ModelBinder(BinderType = typeof(ProdutoModelBinder))]
 
     public class ProdutoImagemViewModel
     {

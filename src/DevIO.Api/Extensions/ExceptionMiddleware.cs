@@ -29,7 +29,7 @@ namespace DevIO.Api.Extensions
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            await exception.ShipAsync(context);
+            //await exception.ShipAsync(context);
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         }
     }

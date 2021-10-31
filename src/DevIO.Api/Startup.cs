@@ -8,17 +8,29 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using DevIO.Api.Extensions;
+using Microsoft.Extensions.Hosting;
 
 namespace DevIO.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
         public IConfiguration Configuration { get; }
+
+        public Startup(IHostEnvironment hostEnvironment)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(hostEnvironment.ContentRootPath)
+                .AddJsonFile("appsettings.json", true, true)
+                .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
+                .AddEnvironmentVariables();
+
+            if (hostEnvironment.IsDevelopment())
+            {
+                builder.AddUserSecrets<Startup>();
+            }
+
+            Configuration = builder.Build();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -32,7 +44,7 @@ namespace DevIO.Api
 
             services.AddAutoMapper(typeof(Startup));
 
-            services.WebApiConfig();
+            services.AddApiConfig();
 
             services.AddSwaggerConfig();
 
@@ -42,24 +54,12 @@ namespace DevIO.Api
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApiVersionDescriptionProvider provider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApiVersionDescriptionProvider provider)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseCors("Development");
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseCors("Production");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-            app.UseAuthentication();
-            app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMvcConfiguration();
+            app.UseApiConfig(env);
 
             app.UseSwaggerConfig(provider);
+
             app.UseLoggingConfiguration();
 
         }

@@ -1,17 +1,10 @@
-﻿using DevIO.Api.Extensions;
+﻿using System;
+using DevIO.Api.Extensions;
 using Elmah.Io.AspNetCore;
 using Elmah.Io.AspNetCore.HealthChecks;
-using Elmah.Io.Extensions.Logging;
-using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DevIO.Api.Configuration
 {
@@ -40,11 +33,16 @@ namespace DevIO.Api.Configuration
             });
             */
 
-            services.AddHealthChecksUI();
+            services.AddHealthChecksUI()
+                .AddSqlServerStorage(_configuration.GetConnectionString("DefaultConnection"));
 
             services.AddHealthChecks()
-                    .AddElmahIoPublisher(_configuration.GetSection("Logger").GetSection("ApiKey").Value, 
-                                new Guid(_configuration.GetSection("Logger").GetSection("LogId").Value),"Api Rest Shilton")
+                    .AddElmahIoPublisher(options =>
+                    {
+                        options.ApiKey = _configuration.GetSection("Logger").GetSection("ApiKey").Value;
+                        options.LogId = new Guid(_configuration.GetSection("Logger").GetSection("LogId").Value);
+                        options.HeartbeatId =  "Api Rest Shilton";
+                    })
 
                     .AddSqlServer(_configuration.GetConnectionString("DefaultConnection"), name: "HealthCheck-BancoSQLServer")
                     .AddCheck("Table Produtos", new SqlServerHealthCheck(_configuration.GetConnectionString("DefaultConnection")));
@@ -55,13 +53,6 @@ namespace DevIO.Api.Configuration
         public static IApplicationBuilder UseLoggingConfiguration(this IApplicationBuilder app)
         {
             app.UseElmahIo();
-
-            app.UseHealthChecksUI(options => { options.UIPath = "/api/hc-ui"; });
-            app.UseHealthChecks("/api/hc", new HealthCheckOptions()
-            {
-                Predicate = _ => true,
-                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-            });
 
             return app;
         }

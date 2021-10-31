@@ -1,20 +1,20 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using DevIO.Api.Extensions;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Net.Http.Headers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DevIO.Api.Configuration
 {
     public static class ApiConfig
     {
 
-        public static IServiceCollection WebApiConfig(this IServiceCollection services)
+        public static IServiceCollection AddApiConfig(this IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddControllers();
 
             services.AddApiVersioning(options =>
             {
@@ -41,8 +41,8 @@ namespace DevIO.Api.Configuration
                     builder
                     .AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
+                    .AllowAnyHeader());
+                    //.AllowCredentials());
 
                 options.AddPolicy("Production", builder =>
                     builder
@@ -55,11 +55,49 @@ namespace DevIO.Api.Configuration
             return services;
         }
 
-        public static IApplicationBuilder UseMvcConfiguration(this IApplicationBuilder app)
+        public static IApplicationBuilder UseApiConfig(this IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //AddCors
+            if (env.IsDevelopment())
+            {
+                app.UseCors("Development");
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseCors("Development"); // Usar apenas nas demos => Configuração Ideal: Production
+                app.UseHsts();
+            }
+
+            app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseHttpsRedirection();
-            app.UseMvc();
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseStaticFiles();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/api/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+                endpoints.MapHealthChecksUI(options =>
+                {
+                    options.UIPath = "/api/hc-ui";
+                    options.ResourcesPath = "/api/hc-ui-resources";
+
+                    options.UseRelativeApiPath = false;
+                    options.UseRelativeResourcesPath = false;
+                    options.UseRelativeWebhookPath = false;
+                });
+
+            });
 
             return app;
         }
