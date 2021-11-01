@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+
+  api:
+    container_name: api_rest_service
+    image: api-rest-3-1:latest
+    build: 
+      context: ../src
+      dockerfile: ./DevIO.Api/Dockerfile
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://*:5001
+    depends_on:
+      - db
+
+  db:
+    container_name: db_sql_server_service
+    image: db_sql_server:latest
+    build: 
+      context: ../docker/sql-server
+      dockerfile: ./Dockerfile
+    restart: always
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "Shilton@20"
+      ACCEPT_EULA: "Y"
