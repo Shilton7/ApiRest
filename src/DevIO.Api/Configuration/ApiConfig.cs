@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
+
 namespace DevIO.Api.Configuration
 {
     public static class ApiConfig
@@ -14,7 +15,7 @@ namespace DevIO.Api.Configuration
 
         public static IServiceCollection AddApiConfig(this IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddApiVersioning(options =>
             {
