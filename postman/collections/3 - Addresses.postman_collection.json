@@ -1,0 +1,72 @@
+{
+	"info": {
+		"_postman_id": "259ff71b-758b-4753-9b6a-564effd36ece",
+		"name": "3 - Addresses",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Find By",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores/obter-endereco/1223dfd0-5e6d-45e4-a627-3ca8c0c8ce93",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores",
+						"obter-endereco",
+						"1223dfd0-5e6d-45e4-a627-3ca8c0c8ce93"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n                \"id\": \"1223DFD0-5E6D-45E4-A627-3CA8C0C8CE93\",\r\n                \"logradouro\": \"rua 2\",\r\n                \"numero\": 21,\r\n                \"complemento\": \"Casa\",\r\n                \"bairro\": \"Centro\",\r\n                \"cep\": \"34505620\",\r\n                \"cidade\": \"BH\",\r\n                \"estado\": \"MG\",\r\n                \"fornecedorId\": \"908bae64-3b3e-4d49-bda9-834e21bdc10e\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores/atualizar-endereco/1223dfd0-5e6d-45e4-a627-3ca8c0c8ce93",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores",
+						"atualizar-endereco",
+						"1223dfd0-5e6d-45e4-a627-3ca8c0c8ce93"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

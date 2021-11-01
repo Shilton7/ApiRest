@@ -1,0 +1,195 @@
+{
+	"info": {
+		"_postman_id": "fc1b0bb9-8f50-40fb-a45f-018ae4f4ce10",
+		"name": "2 - Providers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "All",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find By",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores/908bae64-3b3e-4d49-bda9-834e21bdc10e",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores",
+						"908bae64-3b3e-4d49-bda9-834e21bdc10e"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"908BAE64-3B3E-4D49-BDA9-834E21BDC20E\",\r\n        \"nome\": \"Fornecedor de Camisas de Futebol\",\r\n        \"documento\": \"58542695038\",\r\n        \"tipoFornecedor\": 1,\r\n        \"ativo\": true,\r\n         \"endereco\": {\r\n                \"id\": \"1223DFD0-5E6D-45E4-A627-3CA8C0C8CE91\",\r\n                \"logradouro\": \"rua 1\",\r\n                \"numero\": 21,\r\n                \"complemento\": \"Casa\",\r\n                \"bairro\": \"Centro\",\r\n                \"cep\": \"34505620\",\r\n                \"cidade\": \"BH\",\r\n                \"estado\": \"MG\",\r\n                \"fornecedorId\": \"78A8FA49-BAD7-4C26-ACEC-3FECA6E2D5A4\"\r\n        }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"id\": \"908bae64-3b3e-4d49-bda9-834e21bdc10e\",\r\n        \"nome\": \"Fornecedor de Camisas de Futebol de times da europa\",\r\n        \"documento\": \"71232773093\",\r\n        \"tipoFornecedor\": 1,\r\n        \"ativo\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores/908bae64-3b3e-4d49-bda9-834e21bdc10e",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores",
+						"908bae64-3b3e-4d49-bda9-834e21bdc10e"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{auth_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/v1/fornecedores/78a8fa49-bad7-4c26-acec-3feca6e2d5a4",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"fornecedores",
+						"78a8fa49-bad7-4c26-acec-3feca6e2d5a4"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.sendRequest({",
+					"    url: pm.environment.get(\"url\") + '/api/v1/login',",
+					"    method: 'POST',",
+					"    header: {",
+					"        'content-type': 'application/json'",
+					"    },",
+					"    body: {",
+					"        mode: 'raw',",
+					"        raw: JSON.stringify({ ",
+					"            email: pm.environment.get(\"email\"), ",
+					"            password: pm.environment.get(\"password\") })",
+					"    }",
+					"}, function (err, res) {",
+					"    pm.environment.set(\"auth_token\", \"Bearer \" + res.json().data.accessToken);",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

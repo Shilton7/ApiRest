@@ -1,0 +1,47 @@
+{
+	"info": {
+		"_postman_id": "4e851b95-b690-40a2-8179-43df776ae72e",
+		"name": "5 - Versioning",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Version 1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/v1/teste",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"teste"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Version 2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/v2/teste",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"v2",
+						"teste"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
